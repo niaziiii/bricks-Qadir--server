@@ -7,7 +7,8 @@ const cors = require('cors')
 const globalErrorHandler = require('./controller/errorController')
 const AppError = require('./utilties/appError');
 
-const userRouter = require('./routes/usersRouter')
+const userRouter = require('./routes/usersRouter');
+const adminRouter = require('./routes/adminRouter');
 
 const app = express();
 
@@ -25,6 +26,8 @@ app.use(cors())
 
 
 app.use('/api/v1', userRouter.user)
+app.use('/api/v1/admin', adminRouter)
+
 
 
 app.all('*', (req, res, next) => {

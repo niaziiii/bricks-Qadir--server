@@ -1,10 +1,14 @@
 const express = require('express');
 const userController = require('./../controller/userController')
+const authController = require('./../controller/authController')
+
 const userRouter = express.Router()
 
+
+
 userRouter.route('/')
-.get(userController.getUsers)
-.post(userController.createUser)
+.get(authController.protect,userController.getUsers)
+.post(authController.protect,userController.createUser)
 
 userRouter
 .route('/:id')
