@@ -22,7 +22,7 @@ const createSendTokenCookie = (user, statusCode, res) => {
 
 
     const cookieOptions = {
-        expire: new Date(Date.now()  + process.env.JWT_Cookie_EXPIRE_IN * 24 * 30 * 60 * 1000),
+        expire: new Date(Date.now() + process.env.JWT_Cookie_EXPIRE_IN * 24 * 30 * 60 * 1000),
         httpOnly: true
     };
 
@@ -70,6 +70,8 @@ exports.login = catchAsync(async (req, res, next) => {
 
 })
 
+
+
 exports.protect = catchAsync(async (req, res, next) => {
     //  1). getting token and check it
     let token;
@@ -78,6 +80,8 @@ exports.protect = catchAsync(async (req, res, next) => {
         req.headers.authorization.startsWith('Bearer')
     ) { token = req.headers.authorization.split(' ')[1]; }
     else if (req.cookies.jwt) { token = req.cookies.jwt }
+    else if (req.headers.jwt) { token = req.headers.jwt }
+
 
 
     if (!token) return next(new AppError('Your are not logged in! Please login to get access', 401));
@@ -103,27 +107,15 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 
 
-// this function is for front-end pages to check cookies logged in
-exports.isLoggedIn = async (req, res, next) => {
-    try {
-        //  1). getting token and check it
-        if (req.cookies.jwt) {
-
-            // 2). Verification token like user id 
-            const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWTSECRET)
-
-            // 3). Check if there user stil exit || deleted himself
-            const freshAdmin = await User.findById({ _id: decoded.id })
-            if (!freshAdmin) return next()
-
-            res.locals.user = freshAdmin;
-            return next()
+exports.sendResponse = catchAsync(async (req, res, next) => {
+    // console.log(req.user);
+    res.status(200).json({
+        data: {
+            status: 'success'
         }
-        next();
-    } catch (error) {
-        return next()
-    }
-};
+    })
+})
+
 
 exports.restrictTo = (...roles) => {
     // roles are : lead-guide , admin
